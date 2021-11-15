@@ -325,10 +325,11 @@ public class FlutterLocation
      * Checks whether location services is enabled.
      */
     public boolean checkServiceEnabled() {
+        /* We only accept full GPS tracking, not cell-tower granularity tracking */
         boolean gps_enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        boolean network_enabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        /*boolean network_enabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);*/
 
-        return gps_enabled || network_enabled;
+        return gps_enabled/* || network_enabled*/;
     }
 
     public void requestService(final Result result) {
