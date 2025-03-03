@@ -1,10 +1,11 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
 
 class ChangeNotificationWidget extends StatefulWidget {
-  const ChangeNotificationWidget({Key? key}) : super(key: key);
+  const ChangeNotificationWidget({super.key});
 
   @override
   _ChangeNotificationWidgetState createState() =>
@@ -32,8 +33,10 @@ class _ChangeNotificationWidgetState extends State<ChangeNotificationWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (!Platform.isAndroid) {
-      return const SizedBox();
+    if (kIsWeb || !Platform.isAndroid) {
+      return const Text(
+        'Change notification settings not available on this platform',
+      );
     }
 
     return Form(
@@ -43,7 +46,7 @@ class _ChangeNotificationWidgetState extends State<ChangeNotificationWidget> {
         children: <Widget>[
           Text(
             'Android Notification Settings',
-            style: Theme.of(context).textTheme.bodyText1,
+            style: Theme.of(context).textTheme.bodyLarge,
           ),
           const SizedBox(height: 4),
           TextFormField(
@@ -62,7 +65,7 @@ class _ChangeNotificationWidgetState extends State<ChangeNotificationWidget> {
           const SizedBox(height: 4),
           DropdownButtonFormField<String>(
             value: _iconName,
-            onChanged: (String? value) {
+            onChanged: (value) {
               setState(() {
                 _iconName = value;
               });

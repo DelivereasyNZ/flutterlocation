@@ -2,120 +2,143 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:location/location.dart';
-import 'package:location_platform_interface/location_platform_interface.dart';
 import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
-import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'location_test.mocks.dart';
 
-// ignore: always_specify_types
 @GenerateMocks([Location])
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  final Location location = MockLocation();
+  final mockLocation = MockLocation();
+  Location.instance = mockLocation;
+  final location = Location();
 
   tearDown(resetMockitoState);
 
-  group('getLocation', () {
-    when(location.getLocation()).thenAnswer((_) async {
-      return LocationData.fromMap(<String, double>{
-        'latitude': 48.8534,
-        'longitude': 2.3488,
-      });
-    });
+  test(
+    'changeSettings should call the correct underlying instance',
+    () async {
+      when(location.changeSettings()).thenAnswer((_) => Future.value(true));
 
-    test('getLocation should convert results correctly', () async {
-      final LocationData receivedLocation = await location.getLocation();
-      expect(receivedLocation.latitude, 48.8534);
-      expect(receivedLocation.longitude, 2.3488);
-    });
+      await location.changeSettings();
+      verify(mockLocation.changeSettings()).called(1);
+    },
+  );
 
-    test('getLocation should convert to string correctly', () async {
-      final LocationData receivedLocation = await location.getLocation();
+  test(
+    'isBackgroundModeEnabled should call the correct underlying instance',
+    () async {
+      when(location.isBackgroundModeEnabled())
+          .thenAnswer((_) => Future.value(true));
 
-      expect(receivedLocation.toString(),
-          'LocationData<lat: ${receivedLocation.latitude}, long: ${receivedLocation.longitude}>');
-    });
+      await location.isBackgroundModeEnabled();
+      verify(mockLocation.isBackgroundModeEnabled()).called(1);
+    },
+  );
+
+  test(
+    'enableBackgroundMode should call the correct underlying instance',
+    () async {
+      when(location.enableBackgroundMode())
+          .thenAnswer((_) => Future.value(true));
+
+      await location.enableBackgroundMode();
+      verify(mockLocation.enableBackgroundMode()).called(1);
+    },
+  );
+
+  test('getLocation should call the correct underlying instance', () async {
+    when(location.getLocation())
+        .thenAnswer((_) => Future.value(LocationData.fromMap({})));
+
+    await location.getLocation();
+    verify(mockLocation.getLocation()).called(1);
   });
 
-  test('changeSettings', () async {
-    when(location.changeSettings(
-      accuracy: LocationAccuracy.high,
-      interval: 1000,
-      distanceFilter: 0,
-    )).thenAnswer((_) async => true);
+  test(
+    'hasPermission should call the correct underlying instance',
+    () async {
+      when(location.hasPermission())
+          .thenAnswer((_) => Future.value(PermissionStatus.granted));
 
-    await location.changeSettings();
-    final VerificationResult result = verify(location.changeSettings(
-      accuracy: LocationAccuracy.high,
-      interval: 1000,
-      distanceFilter: 0,
-    ));
+      await location.hasPermission();
+      verify(mockLocation.hasPermission()).called(1);
+    },
+  );
 
-    expect(result.callCount, 1);
+  test(
+    'requestPermission should call the correct underlying instance',
+    () async {
+      when(location.requestPermission())
+          .thenAnswer((_) => Future.value(PermissionStatus.granted));
+
+      await location.requestPermission();
+      verify(mockLocation.requestPermission()).called(1);
+    },
+  );
+
+  test('serviceEnabled should call the correct underlying instance', () async {
+    when(location.serviceEnabled()).thenAnswer((_) => Future.value(true));
+
+    await location.serviceEnabled();
+    verify(mockLocation.serviceEnabled()).called(1);
   });
 
-  group('serviceEnabled-requestService', () {
-    when(location.serviceEnabled()).thenAnswer((_) async => true);
-    when(location.requestService()).thenAnswer((_) async => true);
+  test('requestService should call the correct underlying instance', () async {
+    when(location.requestService()).thenAnswer((_) => Future.value(true));
 
-    test('serviceEnabled', () async {
-      final bool result = await location.serviceEnabled();
-      expect(result, isTrue);
-    });
-
-    test('requestService', () async {
-      final bool result = await location.requestService();
-      expect(result, isTrue);
-    });
+    await location.requestService();
+    verify(mockLocation.requestService()).called(1);
   });
 
-  test('hasPermission', () async {
-    when(location.hasPermission())
-        .thenAnswer((_) async => PermissionStatus.denied);
-    when(location.requestPermission())
-        .thenAnswer((_) async => PermissionStatus.denied);
+  test(
+    'changeNotificationOptions should call the correct underlying instance',
+    () async {
+      when(location.changeNotificationOptions())
+          .thenAnswer((_) => Future.value());
 
-    PermissionStatus receivedPermission = await location.hasPermission();
-    expect(receivedPermission, PermissionStatus.denied);
-
-    receivedPermission = await location.requestPermission();
-    expect(receivedPermission, PermissionStatus.denied);
-  });
+      await location.changeNotificationOptions();
+      verify(mockLocation.changeNotificationOptions()).called(1);
+    },
+  );
 
   group('onLocationChanged', () {
     late StreamController<LocationData> controller;
 
     setUp(() {
       controller = StreamController<LocationData>();
-      when(location.onLocationChanged)
-          .thenAnswer((Invocation invoke) => controller.stream);
+      when(location.onLocationChanged).thenAnswer((_) => controller.stream);
     });
 
     tearDown(() => controller.close());
 
     test('should receive values', () async {
-      controller.add(LocationData.fromMap(<String, double>{
-        'latitude': 48.8534,
-        'longitude': 2.3488,
-      }));
-      controller.add(LocationData.fromMap(<String, double>{
-        'latitude': 42.8534,
-        'longitude': 23.3488,
-      }));
-      controller.close();
+      controller
+        ..add(
+          LocationData.fromMap(<String, dynamic>{
+            'latitude': 48.8534,
+            'longitude': 2.3488,
+          }),
+        )
+        ..add(
+          LocationData.fromMap(<String, dynamic>{
+            'latitude': 42.8534,
+            'longitude': 23.3488,
+          }),
+        );
+      unawaited(controller.close());
 
       await expectLater(
         location.onLocationChanged,
         emitsInOrder(
           <dynamic>[
-            LocationData.fromMap(<String, double>{
+            LocationData.fromMap(<String, dynamic>{
               'latitude': 48.8534,
               'longitude': 2.3488,
             }),
-            LocationData.fromMap(<String, double>{
+            LocationData.fromMap(<String, dynamic>{
               'latitude': 42.8534,
               'longitude': 23.3488,
             }),
@@ -126,7 +149,3 @@ void main() {
     });
   });
 }
-
-class LocationPlatformMock extends Mock
-    with MockPlatformInterfaceMixin
-    implements LocationPlatform {}

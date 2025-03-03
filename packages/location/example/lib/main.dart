@@ -1,6 +1,7 @@
+import 'package:example/change_settings.dart';
+import 'package:example/enable_in_background.dart';
 import 'package:flutter/material.dart';
 import 'package:location/location.dart';
-import 'package:location_example/enable_in_background.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'change_notification.dart';
@@ -9,10 +10,13 @@ import 'listen_location.dart';
 import 'permission_status.dart';
 import 'service_enabled.dart';
 
-void main() => runApp(MyApp());
+const _url = 'https://github.com/Lyokone/flutterlocation';
+
+void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -26,7 +30,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, this.title}) : super(key: key);
+  const MyHomePage({super.key, this.title});
   final String? title;
 
   @override
@@ -39,7 +43,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> _showInfoDialog() {
     return showDialog<void>(
       context: context,
-      builder: (BuildContext context) {
+      builder: (context) {
         return AlertDialog(
           title: const Text('Demo Application'),
           content: SingleChildScrollView(
@@ -48,13 +52,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 const Text('Created by Guillaume Bernos'),
                 InkWell(
                   child: const Text(
-                    'https://github.com/Lyokone/flutterlocation',
+                    _url,
                     style: TextStyle(
                       decoration: TextDecoration.underline,
                     ),
                   ),
-                  onTap: () =>
-                      launch('https://github.com/Lyokone/flutterlocation'),
+                  onTap: () => launchUrl(Uri.parse(_url)),
                 ),
               ],
             ),
@@ -81,14 +84,14 @@ class _MyHomePageState extends State<MyHomePage> {
           IconButton(
             icon: const Icon(Icons.info_outline),
             onPressed: _showInfoDialog,
-          )
+          ),
         ],
       ),
       body: SingleChildScrollView(
         child: Container(
           padding: const EdgeInsets.all(32),
-          child: Column(
-            children: const <Widget>[
+          child: const Column(
+            children: [
               PermissionStatusWidget(),
               Divider(height: 32),
               ServiceEnabledWidget(),
@@ -97,9 +100,11 @@ class _MyHomePageState extends State<MyHomePage> {
               Divider(height: 32),
               ListenLocationWidget(),
               Divider(height: 32),
+              ChangeSettings(),
+              Divider(height: 32),
               EnableInBackgroundWidget(),
               Divider(height: 32),
-              ChangeNotificationWidget()
+              ChangeNotificationWidget(),
             ],
           ),
         ),

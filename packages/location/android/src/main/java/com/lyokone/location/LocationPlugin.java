@@ -53,7 +53,7 @@ public class LocationPlugin implements FlutterPlugin, ActivityAware {
     }
 
     private void detachActivity() {
-        deinitialize();
+        dispose();
 
         activityBinding.getActivity().unbindService(serviceConnection);
         activityBinding = null;
@@ -84,7 +84,9 @@ public class LocationPlugin implements FlutterPlugin, ActivityAware {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             Log.d(TAG, "Service connected: " + name);
-            initialize(((FlutterLocationService.LocalBinder) service).getService());
+            if(service instanceof FlutterLocationService.LocalBinder){
+                initialize(((FlutterLocationService.LocalBinder) service).getService());
+            }
         }
 
         @Override
@@ -108,18 +110,20 @@ public class LocationPlugin implements FlutterPlugin, ActivityAware {
         streamHandlerImpl.setLocation(locationService.getLocation());
     }
 
-    private void deinitialize() {
+    private void dispose() {
         streamHandlerImpl.setLocation(null);
 
         methodCallHandler.setLocationService(null);
         methodCallHandler.setLocation(null);
 
-        activityBinding.removeRequestPermissionsResultListener(locationService.getServiceRequestPermissionsResultListener());
-        activityBinding.removeRequestPermissionsResultListener(locationService.getLocationRequestPermissionsResultListener());
-        activityBinding.removeActivityResultListener(locationService.getLocationActivityResultListener());
+        if(locationService != null){
+            activityBinding.removeRequestPermissionsResultListener(locationService.getServiceRequestPermissionsResultListener());
+            activityBinding.removeRequestPermissionsResultListener(locationService.getLocationRequestPermissionsResultListener());
+            activityBinding.removeActivityResultListener(locationService.getLocationActivityResultListener());
 
-        locationService.setActivity(null);
+            locationService.setActivity(null);
 
-        locationService = null;
+            locationService = null;
+        }
     }
 }
